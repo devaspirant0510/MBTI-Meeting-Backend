@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.ngod.mbtisns.controller.auth.dto.JoinAuthDto
 import org.ngod.mbtisns.core.ApiResult
 import org.ngod.mbtisns.data.entity.Account
+import org.ngod.mbtisns.data.projection.AccountProjection
 import org.ngod.mbtisns.domain.model.jwt.JwtBody
 import org.springframework.http.ResponseEntity
 
@@ -21,7 +22,7 @@ interface AuthSwagger {
 
     @Operation(summary = "유저 조회", description = "user Id 로 유저 조회", method = "get")
     @ApiResponses(value = [ApiResponse(responseCode = "200", description = "마스터 jwt 토큰 발급")])
-    fun getAuthById(accountId: Long): ApiResult<Account>
+    fun getAuthById(accountId: Long): ApiResult<AccountProjection>
 
     @Operation(summary = "마스터 토큰 발급", description = "테스트용 유효기간 없는 토큰", method = "get")
     @ApiResponses(value = [ApiResponse(responseCode = "200", description = "마스터 jwt 토큰 발급")])

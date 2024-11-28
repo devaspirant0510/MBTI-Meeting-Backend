@@ -6,6 +6,8 @@ import org.ngod.mbtisns.data.entity.AccountDmRoom
 import org.ngod.mbtisns.data.entity.Dm
 import org.ngod.mbtisns.data.entity.DmRoom
 import org.ngod.mbtisns.data.entity.enum.DmRoleType
+import org.ngod.mbtisns.data.projection.DmProjection
+import org.ngod.mbtisns.data.projection.DmRoomProjection
 import org.ngod.mbtisns.data.repository.AccountDmRoomRepository
 import org.ngod.mbtisns.data.repository.AuthRepository
 import org.ngod.mbtisns.data.repository.DmRepository
@@ -22,12 +24,18 @@ class DmService(
     private val dmRoomRepository: DmRoomRepository,
     private val authService: AuthService
 ) {
-    fun findRoomById(roomId: Long): DmRoom {
-        val foundDmRoom = dmRoomRepository.findById(roomId)
+    fun findRoomById(roomId: Long): DmRoomProjection {
+        val foundDmRoom = dmRoomRepository.findDmRoomById(roomId)
         if (foundDmRoom.isEmpty) {
             throw ApiException(HttpStatus.UNPROCESSABLE_ENTITY.value(), "존재하지 않는 dm room 입니다")
         }
         return foundDmRoom.get()
+    }
+    fun findDmByIdProjection(id:Long):DmProjection{
+        return dmRepository.findDmById(id).orElseThrow {
+            ApiException(HttpStatus.NOT_FOUND.value(),"존재하지 않는 DM 입니다")
+        }
+
     }
 
     fun createRoom(list: List<Long>): DmRoom {
@@ -46,17 +54,17 @@ class DmService(
 
     fun sendMessage(data: SendDmDto): Dm {
         val sender = authService.findAuthById(data.senderId)
-        val dmRoom = findRoomById(data.dmRoomId)
+        val dmRoom = dmRoomRepository.findById(data.dmRoomId).get()
 
         val dm = Dm(message = data.message, messageType = data.messageType, sender = sender, dmRoom = dmRoom)
         return dmRepository.save(dm)
     }
 
-    fun findAllDmByRoomId(roomId: Long): List<Dm> {
+    fun findAllDmByRoomId(roomId: Long): List<DmProjection> {
         return dmRepository.findAllByDmRoomId(roomId)
     }
 
-    fun findAllDmByRoomIdAtPage(roomId: Long, page: Int, size: Int): Page<Dm> {
+    fun findAllDmByRoomIdAtPage(roomId: Long, page: Int, size: Int): Page<DmProjection> {
         val pageRequest = PageRequest.of(page, size)
         return dmRepository.findAllByDmRoomId(roomId, pageRequest)
     }

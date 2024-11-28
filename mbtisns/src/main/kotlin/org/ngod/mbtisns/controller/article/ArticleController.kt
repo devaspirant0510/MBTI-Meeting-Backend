@@ -5,6 +5,7 @@ import org.ngod.mbtisns.core.ApiException
 import org.ngod.mbtisns.core.ApiResult
 import org.ngod.mbtisns.data.entity.Article
 import org.ngod.mbtisns.data.entity.ArticleLiked
+import org.ngod.mbtisns.data.projection.ArticleProjection
 import org.ngod.mbtisns.domain.service.ArticleService
 import org.ngod.mbtisns.domain.service.AuthService
 import org.ngod.mbtisns.domain.service.FileService
@@ -62,7 +63,7 @@ class ArticleController(
         authorization: String,
         @PathVariable(name = "articleId")
         articleId: Long
-    ): ApiResult<Article> {
+    ): ApiResult<ArticleProjection> {
         println("get article $articleId")
         return ApiResult.success(service.findOneArticleById(articleId))
     }
@@ -102,7 +103,7 @@ class ArticleController(
     override fun findAllArticle(
         @RequestHeader("Authorization")
         authorization: String
-    ): ApiResult<List<Article>> {
+    ): ApiResult<List<ArticleProjection>> {
         jwtService.verifyToken(authorization)
         return ApiResult.success(service.findAllArticle())
     }
@@ -124,9 +125,20 @@ class ArticleController(
     override fun findAllArticleByAccount(
         @RequestHeader("Authorization")
         authorization: String
-    ): ApiResult<List<Article>> {
+    ): ApiResult<List<ArticleProjection>> {
         val jwtBody = jwtService.verifyToken(authorization)
         return ApiResult.success(service.findAllArticleByAccount(jwtBody?.sub!!))
+    }
+
+    @GetMapping("/account/{accountId}")
+    override fun findAllArticleByAccountId(
+        @RequestHeader("Authorization")
+        authorization: String,
+        @PathVariable(name = "accountId")
+        accountId: Long
+    ): ApiResult<List<ArticleProjection>> {
+        jwtService.verifyToken(authorization)
+        return ApiResult.success(service.findAllArticleByAccountId(accountId))
     }
 
 }

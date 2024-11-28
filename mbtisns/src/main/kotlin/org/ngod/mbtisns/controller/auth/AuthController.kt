@@ -1,9 +1,11 @@
 package org.ngod.mbtisns.controller.auth
 
+import lombok.extern.slf4j.Slf4j
 import org.ngod.mbtisns.controller.auth.dto.JoinAuthDto
 import org.ngod.mbtisns.core.ApiException
 import org.ngod.mbtisns.core.ApiResult
 import org.ngod.mbtisns.data.entity.Account
+import org.ngod.mbtisns.data.projection.AccountProjection
 import org.ngod.mbtisns.domain.model.jwt.JwtBody
 import org.ngod.mbtisns.domain.service.AuthService
 import org.ngod.mbtisns.domain.service.JwtService
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*
 
 
 @RestController
+@Slf4j
 @RequestMapping("/api/v1/auth")
 class AuthController(val service: AuthService, val jwtService: JwtService) : AuthSwagger {
     @PostMapping("/login")
@@ -34,8 +37,8 @@ class AuthController(val service: AuthService, val jwtService: JwtService) : Aut
     override fun getAuthById(
         @PathVariable(name = "accountId")
         accountId: Long
-    ): ApiResult<Account> {
-        return ApiResult.success(service.findAuthById(accountId))
+    ): ApiResult<AccountProjection> {
+        return ApiResult.success(service.viewFindAuthById(accountId))
     }
 
     @GetMapping("/masterToken")

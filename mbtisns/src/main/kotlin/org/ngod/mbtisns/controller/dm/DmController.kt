@@ -5,6 +5,8 @@ import org.ngod.mbtisns.controller.dm.dto.SendDmDto
 import org.ngod.mbtisns.core.ApiResult
 import org.ngod.mbtisns.data.entity.Dm
 import org.ngod.mbtisns.data.entity.DmRoom
+import org.ngod.mbtisns.data.projection.DmProjection
+import org.ngod.mbtisns.data.projection.DmRoomProjection
 import org.ngod.mbtisns.domain.service.DmService
 import org.ngod.mbtisns.domain.service.JwtService
 import org.springframework.web.bind.annotation.GetMapping
@@ -50,7 +52,7 @@ class DmController(
         roomId: Long,
         @RequestHeader("Authorization")
         authorization: String
-    ): ApiResult<List<Dm>> {
+    ): ApiResult<List<DmProjection>> {
         return ApiResult.success(dmService.findAllDmByRoomId(roomId))
     }
 
@@ -64,7 +66,7 @@ class DmController(
         size: Int,
         @RequestHeader("Authorization")
         authorization: String
-    ): ApiResult<List<Dm>> {
+    ): ApiResult<List<DmProjection>> {
         return ApiResult.success(dmService.findAllDmByRoomIdAtPage(roomId, page, size).toList())
     }
 
@@ -85,7 +87,7 @@ class DmController(
         roomId: Long,
         @RequestHeader("Authorization")
         authorization: String
-    ):ApiResult<DmRoom> {
+    ):ApiResult<DmRoomProjection> {
         jwtService.verifyToken(authorization)
         val room =dmService.findRoomById(roomId)
         return ApiResult.success(room)

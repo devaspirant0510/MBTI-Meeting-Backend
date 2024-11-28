@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket STOMP Chat</title>
+</head>
+<body>
+<h1>WebSocket STOMP Chat</h1>
+<div>
+    <h2>Messages</h2>
+    <ul id="messages"></ul>
+</div>
+<div>
+    <label for="messageInput">Enter your message:</label>
+    <input type="text" id="messageInput" placeholder="Type a message" />
+    <button id="sendButton">Send</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    // 웹소켓 엔드포인트
+    const socket = new SockJS("http://localhost:8080/ws");
+    const stompClient = Stomp.over(socket);
+
+    // 메시지 리스트 DOM
+    const messageInput = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+    const messagesList = document.getElementById("messages");
+
+    // 초기 DM 데이터 로드
+    function loadInitialMessages() {
+        fetch("http://localhost:8080/api/v1/dm/1",{
+            headers:{
+                "Authorization":"Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0NWEyNTcwOC1lNDBiLTRjOGUtOTgzYy0wZTI2NWJmNjY1MzMiLCJpYXQiOjE3MjgxMTQwNDYsImV4cCI6MjA0MzQ3NDA0NiwiaWQiOjEsInByb3ZpZGVyIjoia2FrYW8iLCJlbWFpbCI6Im5vdmEwMjA1MTBAbmF2ZXIuY29tIiwiY3JlYXRlZEF0IjoiMjAyNC0xMC0wNFQxMDoyMTozOS4yNDMyMTQiLCJtZW1iZXIiOnsiaWQiOjEsIm5pY2tOYW1lIjoi7J247YWU65ah7IOB6riw7JuQM-uFhOywqCIsIm1idGkiOiJJTlRQIiwiY3JlYXRlZEF0IjoiMjAyNC0xMC0wNFQxMDoyMTo0My42NDk0NTEiLCJwcm9maWxlSW1hZ2UiOnsiaWQiOjEsImZpbGUiOnsiaWQiOjEsInByb2ZpbGVVcmwiOiIvVXNlcnMva290bGluYW5kbm9kZS9zZXVuZ2hvL3VwbG9hZHMv4YSJ4YWz4YSP4YWz4YSF4YW14Yar4YSJ4YWj4Ya6IDIwMjQtMTAtMDIg4YSL4YWp4YSS4YWuIDExLjE1LjI0LnBuZyIsImNyZWF0ZWRBdCI6bnVsbH19fX0.-qStonxjOkLl3sG6GQ1AUT-o4y_id8zCWUA0gu_YoXw"
+            }
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch messages");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                data['data'].forEach((dm) => {
+                    const messageElement = document.createElement("li");
+                    const senderInfo = `${dm.sender.member.nickName} (${dm.sender.mbti})`; // Display sender name & UID
+                    const imageSrc = dm.sender.member.profileImage.file.profileUrl
+                    const imgTag = document.createElement("img")
+                    imgTag.src = imageSrc
+                    imgTag.width=40
+                    imgTag.height=40
+                    imgTag.style.borderRadius="100px"
+                    const messageType = dm.messageType === "TEXT" ? "" : `[${dm.messageType}] `;
+                    messageElement.textContent = `${senderInfo}: ${messageType}${dm.message}`;
+                    messagesList.appendChild(imgTag)
+                    messagesList.appendChild(messageElement);
+                });
+            })
+            .catch((error) => {
+                console.error("Error loading initial messages:", error);
+            });
+    }
+
+    // WebSocket 연결
+    stompClient.connect({}, (frame) => {
+        console.log("Connected: " + frame);
+
+        // 메시지 구독
+        stompClient.subscribe("/topic/public/1", (message) => {
+            const messageElement = document.createElement("li");
+            const dm = JSON.parse(message.body);
+            const senderInfo = `${dm.sender.member.nickName} (${dm.sender.mbti})`; // Display sender name & UID
+            const imageSrc = dm.sender.member.profileImage.file.profileUrl
+            const imgTag = document.createElement("img")
+            imgTag.src = imageSrc
+            imgTag.width=40
+            imgTag.height=40
+            imgTag.style.borderRadius="100px"
+            const messageType = dm.messageType === "TEXT" ? "" : `[${dm.messageType}] `;
+            messageElement.textContent = `${senderInfo}: ${messageType}${dm.message}`;
+            messagesList.appendChild(imgTag)
+            messagesList.appendChild(messageElement);
+        });
+
+    });
+
+    // 메시지 보내기
+    sendButton.addEventListener("click", () => {
+        const messageContent = messageInput.value.trim();
+        if (messageContent) {
+            stompClient.send("/app/message/1", {}, JSON.stringify({ content: messageContent ,accountId:1}));
+            messageInput.value = "";
+        }
+    });
+
+    // 초기 메시지 로드 호출
+    loadInitialMessages();
+</script>
+</body>
+</html>

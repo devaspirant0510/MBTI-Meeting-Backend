@@ -12,7 +12,7 @@ interface ArticleLikedRepository :JpaRepository<ArticleLiked,Long>{
     fun findAllByArticleId(id:Long):List<ArticleLiked>
     fun findAllByAccountId(id:Long):List<ArticleLiked>
     fun findByAccountIdAndArticleId(accountId: Long,articleId: Long):List<ArticleLiked>
-    fun countByArticle(article:Article):Int
+    fun countByArticleId(articleId:Long):Long
     @Transactional
     fun deleteByAccountIdAndArticleId(accountId:Long,articleId:Long):Unit
 }

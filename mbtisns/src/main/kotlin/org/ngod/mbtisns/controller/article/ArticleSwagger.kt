@@ -7,6 +7,7 @@ import org.ngod.mbtisns.controller.article.dto.RequestArticleDTO
 import org.ngod.mbtisns.core.ApiResult
 import org.ngod.mbtisns.data.entity.Article
 import org.ngod.mbtisns.data.entity.ArticleLiked
+import org.ngod.mbtisns.data.projection.ArticleProjection
 
 @Tag(name = "Article Api", description = "게시글 관련 API")
 interface ArticleSwagger {
@@ -39,7 +40,7 @@ interface ArticleSwagger {
             example = "1"
         )
         articleId: Long
-    ): ApiResult<Article>
+    ): ApiResult<ArticleProjection>
 
     @Operation(summary = "게시글 좋아요", description = "특정 id 의 게시글에 좋아요")
     fun voteForArticle(
@@ -103,7 +104,7 @@ interface ArticleSwagger {
     @Operation(summary = "모든 글 조회", description = "전체 글을 조회하는 Api ")
     fun findAllArticle(
         authorization: String
-    ): ApiResult<List<Article>>
+    ): ApiResult<List<ArticleProjection>>
 
     @Operation(summary = "모든 글 조회(페이징)", description = "페이징을 이용해 전체 글을 조회하는 Api(Recommend)")
     fun findAllArticle(
@@ -115,5 +116,11 @@ interface ArticleSwagger {
     @Operation(summary = "유저의 글 모두 조회", description = "특정 유저가 작성한 글을 모두 조회하는 Api(Recommend)")
     fun findAllArticleByAccount(
         authorization: String,
-    ):ApiResult<List<Article>>
+    ): ApiResult<List<ArticleProjection>>
+
+    @Operation(summary = "특정 유저의 작성 글 모두 조회", description = "특정 유저의 아이디 기준 작성글 모두 조회하는 API")
+    fun findAllArticleByAccountId(
+        authorization: String,
+        accountId: Long
+    ): ApiResult<List<ArticleProjection>>
 }

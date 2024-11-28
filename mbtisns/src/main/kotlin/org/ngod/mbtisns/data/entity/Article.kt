@@ -30,7 +30,9 @@ data class Article(
     var createdAt:LocalDateTime = LocalDateTime.now(),
 
     @Transient
-    var likeCount:Int=0
+    var likeCount:Long=0,
+    @Transient
+    var commentCount:Long=0
 
 
 
